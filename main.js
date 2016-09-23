@@ -14,8 +14,8 @@ function normalize(vector) {
 
 function mix(v1, v2) {
   return normalize({
-    x: (v1.x + v2.x) / 2,
-    y: (v1.y + v2.y) / 2,
+    x: (v1.x + v2.x) / 100,
+    y: (v1.y + v2.y)/ 5,
   })
 }
 
@@ -48,12 +48,12 @@ let createUnit = () => {
     type: 'unit',
     x: Math.random() * cWidth,
     y: Math.random() * cHeight,
-    v: Math.random() * 5,
-    d: normalize({x: Math.random(), y: Math.random()}),
+    v: Math.random() * 2,
+    d: normalize({x: Math.random() * 2 - 1, y: Math.random() * 2 - 1}),
     r: 2,
 
     move ()  {
-      let units = getUnitsInRadius(this, 50, 'predator')
+      let units = getUnitsInRadius(this, 50, 'unit')
       let position = averagePosition(units)
 
       if (position) {
@@ -64,10 +64,6 @@ let createUnit = () => {
 
         direction = normalize(direction)
 
-        direction = {
-          x: -direction.x,
-          y: -direction.y
-        }
 
         this.d = direction
 
@@ -179,9 +175,9 @@ let init = () => {
     units.push(createUnit())
   }
 
-  for (let i = 0; i < 10; i++) {
-    units.push(createPredator())
-  }
+  // for (let i = 0; i < 10; i++) {
+  //   units.push(createPredator())
+  // }
 
   loop()
 
