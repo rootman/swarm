@@ -13,10 +13,10 @@ function normalize(vector) {
 }
 
 function mix(v1, v2) {
-  return {
+  return normalize({
     x: (v1.x + v2.x) / 2,
     y: (v1.y + v2.y) / 2,
-  }
+  })
 }
 
 
@@ -36,7 +36,6 @@ function averagePosition(units) {
   }
 }
 
-
 let units = []
 
 let getUnitsInRadius = (currentUnit, radius, type) => {
@@ -50,29 +49,35 @@ let createUnit = () => {
     x: Math.random() * cWidth,
     y: Math.random() * cHeight,
     v: Math.random() * 5,
-    d: {x: Math.random(), y: Math.random()},
+    d: normalize({x: Math.random(), y: Math.random()}),
     r: 2,
 
     move ()  {
       let units = getUnitsInRadius(this, 50, 'predator')
       let position = averagePosition(units)
 
-      if (!position) return
+      if (position) {
+        let direction = {
+          x: position.x - this.x,
+          y: position.y - this.y
+        }
 
-      let direction = {
-        x: position.x - this.x,
-        y: position.y - this.y
+        direction = normalize(direction)
+
+        direction = {
+          x: -direction.x,
+          y: -direction.y
+        }
+
+        this.d = direction
+
       }
 
-      direction = normalize(direction)
 
-      direction = {
-        x: -(direction.x * this.v),
-        y: -(direction.y * this.v),
-      }
+      this.x += this.d.x * this.v
+      this.y += this.d.y * this.v
 
-      this.x += direction.x
-      this.y += direction.y
+      this.handleWalls()
     },
 
     draw () {
@@ -80,6 +85,11 @@ let createUnit = () => {
       ctx.fillStyle = "rgb(0,0,0)"
       ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI)
       ctx.fill()
+    },
+
+    handleWalls () {
+      if (this.x < 0 || this.x > cWidth) this.d.x = -this.d.x
+      if (this.y < 0 || this.y > cHeight) this.d.y = -this.d.y
     }
 
   }
@@ -93,33 +103,36 @@ let createPredator = () => {
     x: Math.random() * cWidth,
     y: Math.random() * cHeight,
     v: Math.random() * 5,
-    d: {x: Math.random(), y: Math.random()},
+    d: normalize({x: Math.random(), y: Math.random()}),
     r: 5,
 
     move ()  {
-      // this.r += getUnitsInRadius(this, this.r, 'unit').length / this.r
+      this.r += getUnitsInRadius(this, this.r, 'unit').length / this.r
 
       let units = getUnitsInRadius(this, 50, 'unit')
       let position = averagePosition(units)
 
-      if (!position) return
+      if (position) {
+        let direction = {
+          x: position.x - this.x,
+          y: position.y - this.y
+        }
 
-      let direction = {
-        x: position.x - this.x,
-        y: position.y - this.y
+        direction = normalize(direction)
+
+        direction = {
+          x: -direction.x,
+          y: -direction.y
+        }
+
+        this.d = direction
+
+        this.handleWalls()
       }
 
-      direction = normalize(direction)
 
-
-      direction = {
-        x: direction.x * this.v,
-        y: direction.y * this.v,
-      }
-
-
-      this.x += direction.x
-      this.y += direction.y
+      this.x += this.d.x * this.v
+      this.y += this.d.y * this.v
     },
 
     draw () {
@@ -127,6 +140,11 @@ let createPredator = () => {
       ctx.fillStyle = "rgb(255,0,0)"
       ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI)
       ctx.fill()
+    },
+
+    handleWalls () {
+      if (this.x < 0 || this.x > cWidth) this.d.x = -this.d.x
+      if (this.y < 0 || this.y > cHeight) this.d.y = -this.d.y
     }
 
   }
@@ -161,7 +179,7 @@ let init = () => {
     units.push(createUnit())
   }
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     units.push(createPredator())
   }
 
